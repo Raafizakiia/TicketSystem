@@ -8,6 +8,7 @@
 <body>
   <div class="login-container">
     <h1>Login</h1>
+    <div class="login-subtitle">Sign in to manage your support tickets.</div>
 
     <div id="error" class="error" style="display:none;"></div>
 
@@ -25,7 +26,6 @@
   <script src="app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      // If already logged in, go straight to dashboard
       if (getToken() && getUser()) {
         window.location.href = 'dashboard.html';
         return;
@@ -60,7 +60,7 @@
           window.location.href = 'dashboard.html';
         } catch (err) {
           console.error(err);
-  errBox.textContent = 'Error: ' + (err.message || 'Unknown error');
+          errBox.textContent = 'Error connecting to server.';
           errBox.style.display = 'block';
         }
       });
