@@ -60,7 +60,7 @@
           window.location.href = 'dashboard.html';
         } catch (err) {
           console.error(err);
-          errBox.textContent = 'Error connecting to server.';
+  errBox.textContent = 'Error: ' + (err.message || 'Unknown error');
           errBox.style.display = 'block';
         }
       });
