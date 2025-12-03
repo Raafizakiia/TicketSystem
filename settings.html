@@ -6,73 +6,75 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="topbar"></div>
+  <div class="app-layout">
+    <aside id="sidebar" class="sidebar"></aside>
 
-  <div class="page-wrapper">
-    <h1>Settings</h1>
+    <main class="main-content">
+      <div class="main-card">
+        <h1>Settings</h1>
 
-    <div id="siteMsg" class="msg hidden"></div>
-    <div id="siteErr" class="err hidden"></div>
+        <div id="siteMsg" class="msg hidden"></div>
+        <div id="siteErr" class="err hidden"></div>
 
-    <h2>Website</h2>
-    <form id="siteForm">
-      <label>Website name (browser tab)
-        <input type="text" id="siteName">
-      </label>
+        <h2>Website</h2>
+        <form id="siteForm">
+          <label>Website name (browser tab)
+            <input type="text" id="siteName">
+          </label>
 
-      <label>Favicon / logo path
-        <input type="text" id="faviconPath">
-      </label>
+          <label>Favicon / logo path
+            <input type="text" id="faviconPath">
+          </label>
 
-      <p style="font-size:12px;">
-        Example: <code>favicon.ico</code> or <code>images/logo.png</code>.  
-        Make sure the file exists on your hosting.
-      </p>
+          <p style="font-size:12px; color:#6b7280;">
+            Example: <code>favicon.ico</code> or <code>images/logo.png</code>.  
+            Make sure the file exists on your hosting.
+          </p>
 
-      <button type="submit">Save Website Settings</button>
-    </form>
+          <button type="submit">Save Website Settings</button>
+        </form>
 
-    <hr>
+        <hr>
 
-    <div id="userMsg" class="msg hidden"></div>
-    <div id="userErr" class="err hidden"></div>
+        <div id="userMsg" class="msg hidden"></div>
+        <div id="userErr" class="err hidden"></div>
 
-    <h2>Users</h2>
+        <h2>Users</h2>
 
-    <h3>Create new user</h3>
-    <form id="userForm">
-      <label>Username
-        <input type="text" id="newUsername" required>
-      </label>
+        <h3>Create new user</h3>
+        <form id="userForm">
+          <label>Username
+            <input type="text" id="newUsername" required>
+          </label>
 
-      <label>Password
-        <input type="password" id="newPassword" required>
-      </label>
+          <label>Password
+            <input type="password" id="newPassword" required>
+          </label>
 
-      <label>Role
-        <select id="newRole">
-          <option value="customer">Customer</option>
-          <option value="admin">Admin</option>
-        </select>
-      </label>
+          <label>Role
+            <select id="newRole">
+              <option value="customer">Customer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
 
-      <button type="submit">Create User</button>
-    </form>
+          <button type="submit">Create User</button>
+        </form>
 
-    <h3>Existing users</h3>
-    <table id="usersTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Username</th>
-          <th>Role</th>
-          <th>Created</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- filled by JS -->
-      </tbody>
-    </table>
+        <h3>Existing users</h3>
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
   </div>
 
   <script src="app.js"></script>
@@ -130,91 +132,4 @@
           tr.appendChild(tdId);
 
           const tdName = document.createElement('td');
-          tdName.textContent = u.username;
-          tr.appendChild(tdName);
-
-          const tdRole = document.createElement('td');
-          tdRole.textContent = u.role;
-          tr.appendChild(tdRole);
-
-          const tdCreated = document.createElement('td');
-          tdCreated.textContent = u.created_at;
-          tr.appendChild(tdCreated);
-
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error(err);
-        showUserMsg('Failed to load users.', true);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      requireAuth();
-      await loadSiteSettings('Settings');
-      renderTopbar();
-
-      const user = getUser();
-      if (user.role !== 'admin') {
-        // Safety: redirect non-admins
-        window.location.href = 'dashboard.html';
-        return;
-      }
-
-      await loadSiteSettingsForm();
-      await loadUsersTable();
-
-      // Save site settings
-      document.getElementById('siteForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const site_name = document.getElementById('siteName').value.trim();
-        const favicon = document.getElementById('faviconPath').value.trim();
-
-        try {
-          const res = await apiFetch('/settings', {
-            method: 'POST',
-            body: JSON.stringify({ site_name, favicon })
-          });
-          if (!res.success) {
-            showSiteMsg(res.message || 'Failed to save site settings.', true);
-            return;
-          }
-          showSiteMsg('Site settings updated.');
-
-          // Update title/favicon on page
-          await loadSiteSettings('Settings');
-
-        } catch (err) {
-          console.error(err);
-          showSiteMsg('Error saving site settings.', true);
-        }
-      });
-
-      // Create user
-      document.getElementById('userForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('newUsername').value.trim();
-        const password = document.getElementById('newPassword').value;
-        const role = document.getElementById('newRole').value;
-
-        try {
-          const res = await apiFetch('/users', {
-            method: 'POST',
-            body: JSON.stringify({ username, password, role })
-          });
-          if (!res.success) {
-            showUserMsg(res.message || 'Failed to create user.', true);
-            return;
-          }
-          showUserMsg('User created successfully.');
-          document.getElementById('userForm').reset();
-          await loadUsersTable();
-        } catch (err) {
-          console.error(err);
-          showUserMsg('Error creating user.', true);
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+          tdNa
