@@ -46,7 +46,9 @@ function logout() {
 
 function requireAuth() {
   const token = getToken();
-  if (!token) {
+  const user = getUser();
+  if (!token || !user) {
+    clearAuth();
     window.location.href = 'login.html';
   }
 }
@@ -101,47 +103,23 @@ async function loadSiteSettings(pageSuffix) {
       document.head.appendChild(favicon);
     }
     favicon.href = faviconPath;
+
+    // also put name in sidebar logo text if element exists
+    const siteNameEl = document.getElementById('sidebarSiteName');
+    if (siteNameEl) {
+      siteNameEl.textContent = siteName;
+    }
   } catch (e) {
     console.error('Failed to load site settings', e);
   }
 }
 
-// ===== SIDEBAR (LEFT NAV) =====
-function renderSidebar(activePage) {
-  const sidebar = document.getElementById('sidebar');
-  if (!sidebar) return;
-
+// ===== SIDEBAR USER TEXT (buttons are static in HTML) =====
+function fillSidebarUserInfo() {
+  const el = document.getElementById('sidebarUserInfo');
+  if (!el) return;
   const user = getUser();
   if (!user) return;
 
-  const links = [
-    { id: 'dashboard', href: 'dashboard.html', label: 'Dashboard' },
-    { id: 'tickets', href: 'tickets.html', label: 'Tickets' }
-  ];
-
-  if (user.role === 'admin') {
-    links.push({ id: 'settings', href: 'settings.html', label: 'Admin settings' });
-  }
-
-  let html = `
-    <div class="sidebar-header">
-      <div class="sidebar-logo">ST</div>
-      <div>
-        <div class="sidebar-site">Support Tickets</div>
-        <div class="sidebar-user">${escapeHtml(user.username)} (${escapeHtml(user.role)})</div>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-  `;
-
-  links.forEach(link => {
-    const active = activePage === link.id ? ' active' : '';
-    html += `<a href="${link.href}" class="nav-link${active}">${link.label}</a>`;
-  });
-
-  html += `
-    </nav>
-  `;
-
-  sidebar.innerHTML = html;
+  el.textContent = `${user.username} (${user.role})`;
 }
