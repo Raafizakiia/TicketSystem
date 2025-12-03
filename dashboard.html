@@ -6,75 +6,74 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-layout">
-    <aside id="sidebar" class="sidebar"></aside>
+<div class="app-layout">
+  <aside id="sidebar" class="sidebar"></aside>
 
-    <main class="main-content">
-      <div class="main-card">
+  <main class="main-content">
+    <div class="main-card">
+      <div class="card-header">
         <h1>Dashboard</h1>
-        <p id="roleText"></p>
+        <button id="logoutButton" class="btn-logout-top">Logout</button>
+      </div>
+      <p id="roleText"></p>
 
-        <!-- Stat squares -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Total tickets</div>
-            <div id="totalTickets" class="stat-value">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Open tickets</div>
-            <div id="openTickets" class="stat-value">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Solved tickets</div>
-            <div id="solvedTickets" class="stat-value">0</div>
-          </div>
+      <!-- Stat squares -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total tickets</div>
+          <div id="totalTickets" class="stat-value">0</div>
         </div>
-
-        <!-- Quick navigation buttons -->
-        <div class="quick-links">
-          <a href="tickets.html" class="button-link">
-            <button type="button" class="btn-secondary">View tickets</button>
-          </a>
-          <a href="settings.html" class="button-link admin-settings-link">
-            <button type="button" class="btn-secondary">Admin settings</button>
-          </a>
+        <div class="stat-card">
+          <div class="stat-label">Open tickets</div>
+          <div id="openTickets" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Solved tickets</div>
+          <div id="solvedTickets" class="stat-value">0</div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
+</div>
 
-  <script src="app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      requireAuth();
-      await loadSiteSettings('Dashboard');
-      renderSidebar('dashboard.html');   // fills the left dark area with Dashboard/Tickets/Settings + Logout
+<script src="app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    requireAuth();
+    await loadSiteSettings('Dashboard');
+    renderSidebar('dashboard');
 
-      const user = getUser();
-      const roleText = document.getElementById('roleText');
-      if (user.role === 'admin') {
-        roleText.textContent = 'Admin overview of all tickets.';
-      } else {
-        roleText.textContent = 'Customer overview of your tickets.';
-        // hide admin settings button for non-admins
-        const adminBtn = document.querySelector('.admin-settings-link');
-        if (adminBtn) adminBtn.style.display = 'none';
-      }
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+      });
+    }
 
-      try {
-        const tickets = await apiFetch('/tickets', { method: 'GET' });
+    const user = getUser();
+    const roleText = document.getElementById('roleText');
+    if (user.role === 'admin') {
+      roleText.textContent = 'Admin overview of all tickets.';
+    } else {
+      roleText.textContent = 'Customer overview of your tickets.';
+    }
 
-        const total = tickets.length;
-        const openCount = tickets.filter(t => t.status === 'open').length;
-        const solvedCount = total - openCount;
+    try {
+      const tickets = await apiFetch('/tickets', { method: 'GET' });
 
-        document.getElementById('totalTickets').textContent = total;
-        document.getElementById('openTickets').textContent = openCount;
-        document.getElementById('solvedTickets').textContent = solvedCount;
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  </script>
+      const total = tickets.length;
+      const openCount = tickets.filter(t => t.status === 'open').length;
+      const solvedCount = total - openCount;
+
+      document.getElementById('totalTickets').textContent = total;
+      document.getElementById('openTickets').textContent = openCount;
+      document.getElementById('solvedTickets').textContent = solvedCount;
+    } catch (err) {
+      console.error(err);
+    }
+  });
+</script>
+
 </body>
 </html>
