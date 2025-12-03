@@ -7,14 +7,28 @@
 </head>
 <body>
   <div class="app-layout">
-    <aside id="sidebar" class="sidebar"></aside>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">ST</div>
+        <div>
+          <div id="sidebarSiteName" class="sidebar-site">Syncuva</div>
+          <div id="sidebarUserInfo" class="sidebar-user"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tickets.html" class="nav-link active">Tickets</a>
+        <a href="settings.html" class="nav-link">Admin settings</a>
+      </nav>
+    </aside>
 
     <main class="main-content">
       <div class="main-card">
-<div class="card-header">
-  <h1>Tickets</h1>
-  <button id="logoutButton" class="btn-logout-top">Logout</button>
-</div>
+        <div class="card-header">
+          <h1>Tickets</h1>
+          <button id="logoutButton" class="btn-logout-top">Logout</button>
+        </div>
+
         <div id="message" class="msg hidden"></div>
         <div id="error" class="err hidden"></div>
 
@@ -213,7 +227,15 @@
     document.addEventListener('DOMContentLoaded', async () => {
       requireAuth();
       await loadSiteSettings('Tickets');
-      renderSidebar('tickets.html');
+      fillSidebarUserInfo();
+
+      const logoutBtn = document.getElementById('logoutButton');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+      }
 
       const user = getUser();
 
