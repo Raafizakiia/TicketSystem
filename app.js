@@ -2,7 +2,7 @@
 
 // Adjust this to your n8n endpoint base
 // Example: https://my-n8n.example.com/webhook/support
-const API_BASE = 'https://raafii.app.n8n.cloud/webhook/support/login';
+const API_BASE = 'https://raafii.app.n8n.cloud/webhook/support';
 
 // Escape HTML helper
 function escapeHtml(str) {
