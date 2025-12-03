@@ -46,12 +46,13 @@ function logout() {
 
 function requireAuth() {
   const token = getToken();
-  const user = getUser();
-  if (!token || !user) {
+  // Only check token for now
+  if (!token) {
     clearAuth();
     window.location.href = 'login.html';
   }
 }
+
 
 // ===== FETCH WRAPPER =====
 async function apiFetch(path, options = {}) {
