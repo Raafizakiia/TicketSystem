@@ -1,7 +1,6 @@
 // app.js
 
-// Adjust this to your n8n endpoint base
-// Example: https://my-n8n.example.com/webhook/support
+// Base for all endpoints (no /login at the end)
 const API_BASE = 'https://raafii.app.n8n.cloud/webhook/support';
 
 // Escape HTML helper
@@ -15,7 +14,7 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Auth helpers
+// ===== AUTH HELPERS =====
 function getToken() {
   return localStorage.getItem('authToken');
 }
@@ -52,7 +51,7 @@ function requireAuth() {
   }
 }
 
-// Fetch wrapper that attaches Authorization if token exists
+// ===== FETCH WRAPPER =====
 async function apiFetch(path, options = {}) {
   const token = getToken();
 
@@ -71,7 +70,6 @@ async function apiFetch(path, options = {}) {
 
   const res = await fetch(API_BASE + path, finalOptions);
   if (!res.ok) {
-    // Optionally read error message
     let text = '';
     try {
       text = await res.text();
@@ -79,7 +77,6 @@ async function apiFetch(path, options = {}) {
     throw new Error(`API error ${res.status}: ${text}`);
   }
 
-  // Try JSON, fallback plain text
   const contentType = res.headers.get('Content-Type') || '';
   if (contentType.includes('application/json')) {
     return res.json();
@@ -88,7 +85,7 @@ async function apiFetch(path, options = {}) {
   }
 }
 
-// Load site settings (title + favicon)
+// ===== SITE SETTINGS =====
 async function loadSiteSettings(pageSuffix) {
   try {
     const data = await apiFetch('/settings', { method: 'GET' });
@@ -109,33 +106,54 @@ async function loadSiteSettings(pageSuffix) {
   }
 }
 
-// Render topbar on protected pages
-function renderTopbar() {
-  const bar = document.getElementById('topbar');
-  if (!bar) return;
+// ===== SIDEBAR LAYOUT =====
+function renderSidebar(activePage) {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+
   const user = getUser();
-  if (!user) {
-    bar.innerHTML = '';
-    return;
-  }
+  if (!user) return;
 
-  let links = `<a href="dashboard.html">Dashboard</a> | <a href="tickets.html">Tickets</a>`;
+  const links = [
+    { href: 'dashboard.html', label: 'Dashboard' },
+    { href: 'tickets.html', label: 'Tickets' }
+  ];
+
   if (user.role === 'admin') {
-    links += ' | <a href="settings.html">Settings</a>';
+    links.push({ href: 'settings.html', label: 'Settings' });
   }
-  links += ' | <a href="#" id="logoutLink">Logout</a>';
 
-  bar.innerHTML =
-    'Logged in as: ' +
-    escapeHtml(user.username) +
-    ' (' +
-    escapeHtml(user.role) +
-    ') | ' +
-    links;
+  let html = `
+    <div class="sidebar-header">
+      <div class="sidebar-logo">ST</div>
+      <div>
+        <div class="sidebar-site">Support Tickets</div>
+        <div class="sidebar-user">${escapeHtml(user.username)} (${escapeHtml(user.role)})</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+  `;
 
-  const logoutLink = document.getElementById('logoutLink');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', function (e) {
+  links.forEach(link => {
+    const active =
+      activePage && activePage.toLowerCase() === link.href.toLowerCase()
+        ? ' active'
+        : '';
+    html += `<a href="${link.href}" class="nav-link${active}">${link.label}</a>`;
+  });
+
+  html += `
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logoutButton" class="btn-logout">Logout</button>
+    </div>
+  `;
+
+  sidebar.innerHTML = html;
+
+  const logoutBtn = document.getElementById('logoutButton');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', e => {
       e.preventDefault();
       logout();
     });
