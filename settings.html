@@ -7,14 +7,27 @@
 </head>
 <body>
   <div class="app-layout">
-    <aside id="sidebar" class="sidebar"></aside>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">ST</div>
+        <div>
+          <div id="sidebarSiteName" class="sidebar-site">Syncuvas</div>
+          <div id="sidebarUserInfo" class="sidebar-user"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tickets.html" class="nav-link">Tickets</a>
+        <a href="settings.html" class="nav-link active">Admin settings</a>
+      </nav>
+    </aside>
 
     <main class="main-content">
       <div class="main-card">
-<div class="card-header">
-  <h1>Settings</h1>
-  <button id="logoutButton" class="btn-logout-top">Logout</button>
-</div>
+        <div class="card-header">
+          <h1>Settings</h1>
+          <button id="logoutButton" class="btn-logout-top">Logout</button>
+        </div>
 
         <div id="siteMsg" class="msg hidden"></div>
         <div id="siteErr" class="err hidden"></div>
@@ -30,8 +43,7 @@
           </label>
 
           <p style="font-size:12px; color:#6b7280;">
-            Example: <code>favicon.ico</code> or <code>images/logo.png</code>.  
-            Make sure the file exists on your hosting.
+            Example: <code>favicon.ico</code> or <code>images/logo.png</code>.
           </p>
 
           <button type="submit">Save Website Settings</button>
@@ -135,4 +147,93 @@
           tr.appendChild(tdId);
 
           const tdName = document.createElement('td');
-          tdNa
+          tdName.textContent = u.username;
+          tr.appendChild(tdName);
+
+          const tdRole = document.createElement('td');
+          tdRole.textContent = u.role;
+          tr.appendChild(tdRole);
+
+          const tdCreated = document.createElement('td');
+          tdCreated.textContent = u.created_at;
+          tr.appendChild(tdCreated);
+
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        showUserMsg('Failed to load users.', true);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth();
+      await loadSiteSettings('Settings');
+      fillSidebarUserInfo();
+
+      const logoutBtn = document.getElementById('logoutButton');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+      }
+
+      const user = getUser();
+      if (user.role !== 'admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      await loadSiteSettingsForm();
+      await loadUsersTable();
+
+      document.getElementById('siteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const site_name = document.getElementById('siteName').value.trim();
+        const favicon = document.getElementById('faviconPath').value.trim();
+
+        try {
+          const res = await apiFetch('/settings', {
+            method: 'POST',
+            body: JSON.stringify({ site_name, favicon })
+          });
+          if (!res.success) {
+            showSiteMsg(res.message || 'Failed to save site settings.', true);
+            return;
+          }
+          showSiteMsg('Site settings updated.');
+          await loadSiteSettings('Settings');
+        } catch (err) {
+          console.error(err);
+          showSiteMsg('Error saving site settings.', true);
+        }
+      });
+
+      document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+
+        try {
+          const res = await apiFetch('/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, role })
+          });
+          if (!res.success) {
+            showUserMsg(res.message || 'Failed to create user.', true);
+            return;
+          }
+          showUserMsg('User created successfully.');
+          document.getElementById('userForm').reset();
+          await loadUsersTable();
+        } catch (err) {
+          console.error(err);
+          showUserMsg('Error creating user.', true);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
