@@ -11,6 +11,40 @@
     --text-main: #111827;
     --text-muted: #6b7280;
 }
+/* Card header with logout button on the right */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.card-header h1 {
+    margin: 0;
+}
+
+.btn-logout-top {
+    background: var(--danger);
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 13px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(239, 68, 68, 0.35);
+    transition: background 0.12s ease, transform 0.08s ease,
+        box-shadow 0.12s ease;
+}
+
+.btn-logout-top:hover {
+    background: var(--danger-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(239, 68, 68, 0.45);
+}
+
+.btn-logout-top:active {
+    transform: translateY(0);
+}
 
 *,
 *::before,
