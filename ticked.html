@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Support Tickets | Tickets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <div class="page-wrapper">
+    <h1>Tickets</h1>
+
+    <div id="message" class="msg hidden"></div>
+    <div id="error" class="err hidden"></div>
+
+    <div class="filters">
+      Filter:
+      <a href="#" data-status="" class="active">All</a>
+      <a href="#" data-status="open">Open</a>
+      <a href="#" data-status="solved">Solved</a>
+    </div>
+
+    <table id="ticketsTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Description</th>
+          <th class="admin-only">Customer</th>
+          <th class="admin-only">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Create New Ticket</h2>
+    <form id="newTicketForm">
+      <div id="adminOwnerSelect" class="admin-only hidden">
+        <label>Customer (ticket owner)
+          <select id="ticketOwner"></select>
+        </label>
+      </div>
+
+      <label>Title
+        <input type="text" id="ticketTitle" required>
+      </label>
+
+      <label>Description
+        <textarea id="ticketDescription" rows="4" required></textarea>
+      </label>
+
+      <button type="submit">Submit Ticket</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let currentStatusFilter = '';
+
+    function showMessage(text) {
+      const box = document.getElementById('message');
+      box.textContent = text;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 3000);
+    }
+
+    function showError(text) {
+      const box = document.getElementById('error');
+      box.textContent = text;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 5000);
+    }
+
+    function updateFilterLinks() {
+      document.querySelectorAll('.filters a').forEach(a => {
+        const status = a.getAttribute('data-status');
+        if (status === currentStatusFilter) {
+          a.classList.add('active');
+        } else {
+          a.classList.remove('active');
+        }
+      });
+    }
+
+    async function loadTickets() {
+      try {
+        let path = '/tickets';
+        if (currentStatusFilter) {
+          path += '?status=' + encodeURIComponent(currentStatusFilter);
+        }
+        const tickets = await apiFetch(path, { method: 'GET' });
+        const tbody = document.querySelector('#ticketsTable tbody');
+        const user = getUser();
+
+        tbody.innerHTML = '';
+
+        if (!tickets || tickets.length === 0) {
+          const cols = user.role === 'admin' ? 7 : 5;
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = cols;
+          td.textContent = 'No tickets found.';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          return;
+        }
+
+        tickets.forEach(t => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.textContent = t.id;
+          tr.appendChild(tdId);
+
+          const tdTitle = document.createElement('td');
+          tdTitle.textContent = t.title;
+          tr.appendChild(tdTitle);
+
+          const tdStatus = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.textContent = t.status;
+          badge.className = t.status === 'open' ? 'badge-open' : 'badge-solved';
+          tdStatus.appendChild(badge);
+          tr.appendChild(tdStatus);
+
+          const tdCreated = document.createElement('td');
+          tdCreated.textContent = t.created_at;
+          tr.appendChild(tdCreated);
+
+          const tdDesc = document.createElement('td');
+          tdDesc.innerHTML = escapeHtml(t.description).replace(/\n/g, '<br>');
+          tr.appendChild(tdDesc);
+
+          if (user.role === 'admin') {
+            const tdOwner = document.createElement('td');
+            tdOwner.textContent = t.owner_username || t.owner || '';
+            tr.appendChild(tdOwner);
+
+            const tdActions = document.createElement('td');
+            const btn = document.createElement('button');
+            if (t.status === 'open') {
+              btn.textContent = 'Mark Solved';
+              btn.addEventListener('click', () => updateTicketStatus(t.id, 'solved'));
+            } else {
+              btn.textContent = 'Re-open';
+              btn.addEventListener('click', () => updateTicketStatus(t.id, 'open'));
+            }
+            tdActions.appendChild(btn);
+            tr.appendChild(tdActions);
+          }
+
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error(err);
+        showError('Failed to load tickets.');
+      }
+    }
+
+    async function updateTicketStatus(id, status) {
+      try {
+        const res = await apiFetch('/tickets/update-status', {
+          method: 'POST',
+          body: JSON.stringify({ id, status })
+        });
+
+        if (!res.success) {
+          showError(res.message || 'Failed to update status.');
+          return;
+        }
+        showMessage('Ticket status updated.');
+        await loadTickets();
+      } catch (err) {
+        console.error(err);
+        showError('Error updating ticket status.');
+      }
+    }
+
+    async function loadCustomersForAdmin() {
+      const user = getUser();
+      if (user.role !== 'admin') return;
+
+      try {
+        const customers = await apiFetch('/users?role=customer', { method: 'GET' });
+        const select = document.getElementById('ticketOwner');
+        select.innerHTML = '';
+
+        customers.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.username;
+          select.appendChild(opt);
+        });
+
+      } catch (err) {
+        console.error(err);
+        showError('Failed to load customers list.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth();
+      await loadSiteSettings('Tickets');
+      renderTopbar();
+
+      const user = getUser();
+
+      // Show/hide admin-only columns/fields
+      document.querySelectorAll('.admin-only').forEach(el => {
+        if (user.role === 'admin') {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (user.role === 'admin') {
+        document.getElementById('adminOwnerSelect').classList.remove('hidden');
+        await loadCustomersForAdmin();
+      }
+
+      // Filters
+      document.querySelectorAll('.filters a').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentStatusFilter = a.getAttribute('data-status') || '';
+          updateFilterLinks();
+          loadTickets();
+        });
+      });
+      updateFilterLinks();
+
+      await loadTickets();
+
+      // New ticket form
+      const form = document.getElementById('newTicketForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('ticketTitle').value.trim();
+        const description = document.getElementById('ticketDescription').value.trim();
+        let ownerId = null;
+
+        if (user.role === 'admin') {
+          ownerId = document.getElementById('ticketOwner').value;
+        }
+
+        try {
+          const res = await apiFetch('/tickets', {
+            method: 'POST',
+            body: JSON.stringify({
+              title,
+              description,
+              owner_id: ownerId // backend: if null and role=customer, use current user
+            })
+          });
+
+          if (!res.success) {
+            showError(res.message || 'Failed to create ticket.');
+            return;
+          }
+          showMessage('Ticket created successfully.');
+          form.reset();
+          await loadTickets();
+        } catch (err) {
+          console.error(err);
+          showError('Error creating ticket.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
