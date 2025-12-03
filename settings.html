@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Support Tickets | Settings</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <div class="page-wrapper">
+    <h1>Settings</h1>
+
+    <div id="siteMsg" class="msg hidden"></div>
+    <div id="siteErr" class="err hidden"></div>
+
+    <h2>Website</h2>
+    <form id="siteForm">
+      <label>Website name (browser tab)
+        <input type="text" id="siteName">
+      </label>
+
+      <label>Favicon / logo path
+        <input type="text" id="faviconPath">
+      </label>
+
+      <p style="font-size:12px;">
+        Example: <code>favicon.ico</code> or <code>images/logo.png</code>.  
+        Make sure the file exists on your hosting.
+      </p>
+
+      <button type="submit">Save Website Settings</button>
+    </form>
+
+    <hr>
+
+    <div id="userMsg" class="msg hidden"></div>
+    <div id="userErr" class="err hidden"></div>
+
+    <h2>Users</h2>
+
+    <h3>Create new user</h3>
+    <form id="userForm">
+      <label>Username
+        <input type="text" id="newUsername" required>
+      </label>
+
+      <label>Password
+        <input type="password" id="newPassword" required>
+      </label>
+
+      <label>Role
+        <select id="newRole">
+          <option value="customer">Customer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </label>
+
+      <button type="submit">Create User</button>
+    </form>
+
+    <h3>Existing users</h3>
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function showSiteMsg(text, isError = false) {
+      const msg = document.getElementById('siteMsg');
+      const err = document.getElementById('siteErr');
+      msg.classList.add('hidden');
+      err.classList.add('hidden');
+      if (isError) {
+        err.textContent = text;
+        err.classList.remove('hidden');
+      } else {
+        msg.textContent = text;
+        msg.classList.remove('hidden');
+      }
+    }
+
+    function showUserMsg(text, isError = false) {
+      const msg = document.getElementById('userMsg');
+      const err = document.getElementById('userErr');
+      msg.classList.add('hidden');
+      err.classList.add('hidden');
+      if (isError) {
+        err.textContent = text;
+        err.classList.remove('hidden');
+      } else {
+        msg.textContent = text;
+        msg.classList.remove('hidden');
+      }
+    }
+
+    async function loadSiteSettingsForm() {
+      try {
+        const data = await apiFetch('/settings', { method: 'GET' });
+        document.getElementById('siteName').value = data.site_name || '';
+        document.getElementById('faviconPath').value = data.favicon || '';
+      } catch (err) {
+        console.error(err);
+        showSiteMsg('Failed to load site settings.', true);
+      }
+    }
+
+    async function loadUsersTable() {
+      try {
+        const users = await apiFetch('/users', { method: 'GET' });
+        const tbody = document.querySelector('#usersTable tbody');
+        tbody.innerHTML = '';
+
+        users.forEach(u => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.textContent = u.id;
+          tr.appendChild(tdId);
+
+          const tdName = document.createElement('td');
+          tdName.textContent = u.username;
+          tr.appendChild(tdName);
+
+          const tdRole = document.createElement('td');
+          tdRole.textContent = u.role;
+          tr.appendChild(tdRole);
+
+          const tdCreated = document.createElement('td');
+          tdCreated.textContent = u.created_at;
+          tr.appendChild(tdCreated);
+
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        showUserMsg('Failed to load users.', true);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth();
+      await loadSiteSettings('Settings');
+      renderTopbar();
+
+      const user = getUser();
+      if (user.role !== 'admin') {
+        // Safety: redirect non-admins
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      await loadSiteSettingsForm();
+      await loadUsersTable();
+
+      // Save site settings
+      document.getElementById('siteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const site_name = document.getElementById('siteName').value.trim();
+        const favicon = document.getElementById('faviconPath').value.trim();
+
+        try {
+          const res = await apiFetch('/settings', {
+            method: 'POST',
+            body: JSON.stringify({ site_name, favicon })
+          });
+          if (!res.success) {
+            showSiteMsg(res.message || 'Failed to save site settings.', true);
+            return;
+          }
+          showSiteMsg('Site settings updated.');
+
+          // Update title/favicon on page
+          await loadSiteSettings('Settings');
+
+        } catch (err) {
+          console.error(err);
+          showSiteMsg('Error saving site settings.', true);
+        }
+      });
+
+      // Create user
+      document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+
+        try {
+          const res = await apiFetch('/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, role })
+          });
+          if (!res.success) {
+            showUserMsg(res.message || 'Failed to create user.', true);
+            return;
+          }
+          showUserMsg('User created successfully.');
+          document.getElementById('userForm').reset();
+          await loadUsersTable();
+        } catch (err) {
+          console.error(err);
+          showUserMsg('Error creating user.', true);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
