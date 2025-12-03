@@ -6,75 +6,85 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app-layout">
-  <aside id="sidebar" class="sidebar"></aside>
-
-  <main class="main-content">
-    <div class="main-card">
-      <div class="card-header">
-        <h1>Dashboard</h1>
-        <button id="logoutButton" class="btn-logout-top">Logout</button>
-      </div>
-      <p id="roleText"></p>
-
-      <!-- Stat squares -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total tickets</div>
-          <div id="totalTickets" class="stat-value">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Open tickets</div>
-          <div id="openTickets" class="stat-value">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Solved tickets</div>
-          <div id="solvedTickets" class="stat-value">0</div>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">ST</div>
+        <div>
+          <div id="sidebarSiteName" class="sidebar-site">Support Tickets</div>
+          <div id="sidebarUserInfo" class="sidebar-user"></div>
         </div>
       </div>
-    </div>
-  </main>
-</div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="tickets.html" class="nav-link">Tickets</a>
+        <a href="settings.html" class="nav-link">Admin settings</a>
+      </nav>
+    </aside>
 
-<script src="app.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    requireAuth();
-    await loadSiteSettings('Dashboard');
-    renderSidebar('dashboard');
+    <main class="main-content">
+      <div class="main-card">
+        <div class="card-header">
+          <h1>Dashboard</h1>
+          <button id="logoutButton" class="btn-logout-top">Logout</button>
+        </div>
+        <p id="roleText"></p>
 
-    const logoutBtn = document.getElementById('logoutButton');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-      });
-    }
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total tickets</div>
+            <div id="totalTickets" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Open tickets</div>
+            <div id="openTickets" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Solved tickets</div>
+            <div id="solvedTickets" class="stat-value">0</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-    const user = getUser();
-    const roleText = document.getElementById('roleText');
-    if (user.role === 'admin') {
-      roleText.textContent = 'Admin overview of all tickets.';
-    } else {
-      roleText.textContent = 'Customer overview of your tickets.';
-    }
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth();
+      await loadSiteSettings('Dashboard');
+      fillSidebarUserInfo();
 
-    try {
-      const tickets = await apiFetch('/tickets', { method: 'GET' });
+      const logoutBtn = document.getElementById('logoutButton');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+      }
 
-      const total = tickets.length;
-      const openCount = tickets.filter(t => t.status === 'open').length;
-      const solvedCount = total - openCount;
+      const user = getUser();
+      const roleText = document.getElementById('roleText');
+      if (user.role === 'admin') {
+        roleText.textContent = 'Admin overview of all tickets.';
+      } else {
+        roleText.textContent = 'Customer overview of your tickets.';
+      }
 
-      document.getElementById('totalTickets').textContent = total;
-      document.getElementById('openTickets').textContent = openCount;
-      document.getElementById('solvedTickets').textContent = solvedCount;
-    } catch (err) {
-      console.error(err);
-      
-    }
-  });
-</script>
+      try {
+        const tickets = await apiFetch('/tickets', { method: 'GET' });
 
+        const total = tickets.length;
+        const openCount = tickets.filter(t => t.status === 'open').length;
+        const solvedCount = total - openCount;
+
+        document.getElementById('totalTickets').textContent = total;
+        document.getElementById('openTickets').textContent = openCount;
+        document.getElementById('solvedTickets').textContent = solvedCount;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
