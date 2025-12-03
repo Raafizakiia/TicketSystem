@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Support Tickets | Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <div class="page-wrapper">
+    <h1>Dashboard</h1>
+    <p id="roleText"></p>
+
+    <ul>
+      <li>Total tickets: <strong id="totalTickets">0</strong></li>
+      <li>Open tickets: <strong id="openTickets">0</strong></li>
+      <li>Solved tickets: <strong id="solvedTickets">0</strong></li>
+    </ul>
+
+    <p><a href="tickets.html">Go to tickets</a></p>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth();
+      await loadSiteSettings('Dashboard');
+      renderTopbar();
+
+      const user = getUser();
+      const roleText = document.getElementById('roleText');
+      if (user.role === 'admin') {
+        roleText.textContent = 'Admin overview of all tickets.';
+      } else {
+        roleText.textContent = 'Customer overview of your tickets.';
+      }
+
+      try {
+        // Backend should return only the tickets for this user if role=customer,
+        // and all tickets if role=admin.
+        const tickets = await apiFetch('/tickets', { method: 'GET' });
+
+        const total = tickets.length;
+        const openCount = tickets.filter(t => t.status === 'open').length;
+        const solvedCount = total - openCount;
+
+        document.getElementById('totalTickets').textContent = total;
+        document.getElementById('openTickets').textContent = openCount;
+        document.getElementById('solvedTickets').textContent = solvedCount;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
