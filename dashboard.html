@@ -14,13 +14,31 @@
         <h1>Dashboard</h1>
         <p id="roleText"></p>
 
-        <ul>
-          <li>Total tickets: <strong id="totalTickets">0</strong></li>
-          <li>Open tickets: <strong id="openTickets">0</strong></li>
-          <li>Solved tickets: <strong id="solvedTickets">0</strong></li>
-        </ul>
+        <!-- Stat squares -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total tickets</div>
+            <div id="totalTickets" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Open tickets</div>
+            <div id="openTickets" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Solved tickets</div>
+            <div id="solvedTickets" class="stat-value">0</div>
+          </div>
+        </div>
 
-        <p><a href="tickets.html">Go to tickets</a></p>
+        <!-- Quick navigation buttons -->
+        <div class="quick-links">
+          <a href="tickets.html" class="button-link">
+            <button type="button" class="btn-secondary">View tickets</button>
+          </a>
+          <a href="settings.html" class="button-link admin-settings-link">
+            <button type="button" class="btn-secondary">Admin settings</button>
+          </a>
+        </div>
       </div>
     </main>
   </div>
@@ -30,7 +48,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       requireAuth();
       await loadSiteSettings('Dashboard');
-      renderSidebar('dashboard.html');
+      renderSidebar('dashboard.html');   // fills the left dark area with Dashboard/Tickets/Settings + Logout
 
       const user = getUser();
       const roleText = document.getElementById('roleText');
@@ -38,6 +56,9 @@
         roleText.textContent = 'Admin overview of all tickets.';
       } else {
         roleText.textContent = 'Customer overview of your tickets.';
+        // hide admin settings button for non-admins
+        const adminBtn = document.querySelector('.admin-settings-link');
+        if (adminBtn) adminBtn.style.display = 'none';
       }
 
       try {
