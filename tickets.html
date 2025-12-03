@@ -6,58 +6,60 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="topbar"></div>
+  <div class="app-layout">
+    <aside id="sidebar" class="sidebar"></aside>
 
-  <div class="page-wrapper">
-    <h1>Tickets</h1>
+    <main class="main-content">
+      <div class="main-card">
+        <h1>Tickets</h1>
 
-    <div id="message" class="msg hidden"></div>
-    <div id="error" class="err hidden"></div>
+        <div id="message" class="msg hidden"></div>
+        <div id="error" class="err hidden"></div>
 
-    <div class="filters">
-      Filter:
-      <a href="#" data-status="" class="active">All</a>
-      <a href="#" data-status="open">Open</a>
-      <a href="#" data-status="solved">Solved</a>
-    </div>
+        <div class="filters">
+          Filter:
+          <a href="#" data-status="" class="active">All</a>
+          <a href="#" data-status="open">Open</a>
+          <a href="#" data-status="solved">Solved</a>
+        </div>
 
-    <table id="ticketsTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Description</th>
-          <th class="admin-only">Customer</th>
-          <th class="admin-only">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Filled by JS -->
-      </tbody>
-    </table>
+        <table id="ticketsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Description</th>
+              <th class="admin-only">Customer</th>
+              <th class="admin-only">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
 
-    <hr>
+        <hr>
 
-    <h2>Create New Ticket</h2>
-    <form id="newTicketForm">
-      <div id="adminOwnerSelect" class="admin-only hidden">
-        <label>Customer (ticket owner)
-          <select id="ticketOwner"></select>
-        </label>
+        <h2>Create New Ticket</h2>
+        <form id="newTicketForm">
+          <div id="adminOwnerSelect" class="admin-only hidden">
+            <label>Customer (ticket owner)
+              <select id="ticketOwner"></select>
+            </label>
+          </div>
+
+          <label>Title
+            <input type="text" id="ticketTitle" required>
+          </label>
+
+          <label>Description
+            <textarea id="ticketDescription" rows="4" required></textarea>
+          </label>
+
+          <button type="submit">Submit Ticket</button>
+        </form>
       </div>
-
-      <label>Title
-        <input type="text" id="ticketTitle" required>
-      </label>
-
-      <label>Description
-        <textarea id="ticketDescription" rows="4" required></textarea>
-      </label>
-
-      <button type="submit">Submit Ticket</button>
-    </form>
+    </main>
   </div>
 
   <script src="app.js"></script>
@@ -209,11 +211,10 @@
     document.addEventListener('DOMContentLoaded', async () => {
       requireAuth();
       await loadSiteSettings('Tickets');
-      renderTopbar();
+      renderSidebar('tickets.html');
 
       const user = getUser();
 
-      // Show/hide admin-only columns/fields
       document.querySelectorAll('.admin-only').forEach(el => {
         if (user.role === 'admin') {
           el.classList.remove('hidden');
@@ -227,7 +228,6 @@
         await loadCustomersForAdmin();
       }
 
-      // Filters
       document.querySelectorAll('.filters a').forEach(a => {
         a.addEventListener('click', (e) => {
           e.preventDefault();
@@ -240,7 +240,6 @@
 
       await loadTickets();
 
-      // New ticket form
       const form = document.getElementById('newTicketForm');
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -258,7 +257,7 @@
             body: JSON.stringify({
               title,
               description,
-              owner_id: ownerId // backend: if null and role=customer, use current user
+              owner_id: ownerId
             })
           });
 
