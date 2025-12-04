@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<div class="flex flex-col justify-between bg-white dark:bg-background-dark border-r border-gray-200 dark:border-gray-800 w-64 p-4 shrink-0">
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<span class="material-symbols-outlined text-primary text-3xl">hub</span>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">Support Co.</h1>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 px-3 py-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar of Antonia Rossi" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAjTmeKKeg4_sVldp6-lsI629faBah8EAtiXWUiAVl7rEgi9mCi7ZrAPHQfMgaGvQsH88ATe3DvaWLOO4-dqdeJd7OPtUyPZ-w3XPY4lTKadCjE94wxFOjR5C4JPwEDGdDX31vg_SAnVKDf4HKwqKgGxu_O4mVdwc3fgdINaI6N6LCrF1AHMs0JGURrwQCq05G6ZnUDNtJTU81LMpt-9TaT-dHgBvGH2ItFJiphq3FOWiG9gIg7RaoZMIBqI_D_9siHn_DGOGsiaM8_");'></div>
+<div class="flex flex-col">
+<h1 class="text-gray-900 dark:text-gray-100 text-sm font-medium leading-normal">Antonia Rossi</h1>
+<p class="text-gray-500 dark:text-gray-400 text-xs font-normal leading-normal">antonia.rossi@example.com</p>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined text-xl">confirmation_number</span>
+<p class="text-sm font-medium leading-normal">My Tickets</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0">add_circle</span>
+<p class="text-sm font-medium leading-normal">Submit a New Ticket</p>
+</a>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0">logout</span>
+<p class="text-sm font-medium leading-normal">Logout</p>
+</a>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="max-w-7xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<p class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight">My Support Tickets</p>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">View and manage all of your support requests here.</p>
+</div>
+<button class="flex items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+<span class="truncate">New Ticket</span>
+</button>
+</div>
+<!-- Search and Filter Section -->
+<div class="flex flex-col md:flex-row gap-4 mb-6">
+<!-- SearchBar -->
+<div class="flex-1">
+<label class="flex flex-col w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-11">
+<div class="text-gray-500 dark:text-gray-400 flex border-none bg-white dark:bg-background-dark items-center justify-center pl-4 rounded-l-lg border border-gray-200 dark:border-gray-700 border-r-0">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 border-l-0 text-sm font-normal leading-normal" placeholder="Search by keyword..." value=""/>
+</div>
+</label>
+</div>
+<!-- Chips -->
+<div class="flex items-center gap-2">
+<div class="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-primary/10 text-primary px-4">
+<p class="text-sm font-medium leading-normal">All</p>
+</div>
+<div class="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 px-4 hover:bg-gray-50 dark:hover:bg-white/5">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">Open</p>
+</div>
+<div class="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 px-4 hover:bg-gray-50 dark:hover:bg-white/5">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">In Progress</p>
+</div>
+<div class="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 px-4 hover:bg-gray-50 dark:hover:bg-white/5">
+<p class="text-gray-700 dark:text-gray-300 text-sm font-medium leading-normal">Closed</p>
+</div>
+</div>
+</div>
+<!-- Table -->
+<div class="w-full @container">
+<div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark">
+<table class="w-full">
+<thead class="bg-gray-50 dark:bg-white/5">
+<tr>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[15%] text-xs font-medium leading-normal uppercase tracking-wider">Ticket ID</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[45%] text-xs font-medium leading-normal uppercase tracking-wider">Subject</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[20%] text-xs font-medium leading-normal uppercase tracking-wider">Status</th>
+<th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 w-[20%] text-xs font-medium leading-normal uppercase tracking-wider">Last Updated</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-t-gray-200 dark:border-t-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer">
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">#73822</td>
+<td class="h-[72px] px-4 py-2 text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Cannot reset my password</td>
+<td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="inline-flex items-center justify-center rounded-full h-7 px-3 bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300 text-xs font-medium">
+<span>Open</span>
+</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">2 mins ago</td>
+</tr>
+<tr class="border-t border-t-gray-200 dark:border-t-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer">
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">#73819</td>
+<td class="h-[72px] px-4 py-2 text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Billing inquiry for invoice #INV-2023-102</td>
+<td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="inline-flex items-center justify-center rounded-full h-7 px-3 bg-orange-100 dark:bg-orange-500/20 text-orange-800 dark:text-orange-300 text-xs font-medium">
+<span>In Progress</span>
+</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">1 day ago</td>
+</tr>
+<tr class="border-t border-t-gray-200 dark:border-t-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer">
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">#73755</td>
+<td class="h-[72px] px-4 py-2 text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Feature request: Dark mode</td>
+<td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="inline-flex items-center justify-center rounded-full h-7 px-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs font-medium">
+<span>Closed</span>
+</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">5 days ago</td>
+</tr>
+<tr class="border-t border-t-gray-200 dark:border-t-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer">
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">#73641</td>
+<td class="h-[72px] px-4 py-2 text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">Login issue on mobile app</td>
+<td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+<div class="inline-flex items-center justify-center rounded-full h-7 px-3 bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 text-xs font-medium">
+<span>Urgent</span>
+</div>
+</td>
+<td class="h-[72px] px-4 py-2 text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">1 week ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
