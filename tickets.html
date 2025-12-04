@@ -183,24 +183,25 @@
       }
     }
 
-    async function updateTicketStatus(id, status) {
-      try {
-        const res = await apiFetch('/tickets/update-status', {
-          method: 'POST',
-          body: JSON.stringify({ id, status })
-        });
+async function updateTicketStatus(id, status) {
+  try {
+    const res = await apiFetch('/tickets/update-status', {
+      method: 'POST',
+      body: JSON.stringify({ id, status })
+    });
 
-        if (!res.success) {
-          showError(res.message || 'Failed to update status.');
-          return;
-        }
-        showMessage('Ticket status updated.');
-        await loadTickets();
-      } catch (err) {
-        console.error(err);
-        showError('Error updating ticket status.');
-      }
+    if (!res.success) {
+      showError(res.message || 'Failed to update status.');
+      return;
     }
+    showMessage('Ticket status updated.');
+    await loadTickets();
+  } catch (err) {
+    console.error(err);
+    showError('Error updating ticket status.');
+  }
+}
+
 
     async function loadCustomersForAdmin() {
       const user = getUser();
